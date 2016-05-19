@@ -1,6 +1,6 @@
 {
   "name": "async-array-wrapper",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Wrapper to make array functions that take a callback asynchronous.",
   "main": "index.js",
   "scripts": {
