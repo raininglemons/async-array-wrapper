@@ -96,3 +96,15 @@ new AsyncArray([1, 2, 3, 4])
   });
 
 ```
+
+## Todo
+
+* Test all remaining wrapped methods
+    * map
+    * every
+    * filter
+    * find
+    * findIndex
+    * reduce
+    * reduceRight
+    * some
