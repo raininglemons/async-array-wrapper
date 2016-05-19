@@ -62,8 +62,8 @@ The following functions are intercepted (where available):
 * filter
 * find
 * findIndex
-* reduce
-* reduceRight
+* reduce - use only with an object as an initialValue (no primitives)
+* reduceRight - use only with an object as an initialValue (no primitives)
 * some
 
 The only difference to their Array.* equivalent is that they are passed a `done` function as the first argument, the

@@ -104,7 +104,7 @@ function generateIterableWrapper(superFn, methodName) {
           done(resp);
         }
 
-        return resp;
+        return resp || args[0];
       }].concat(extraArgs));
     }
     return this;
