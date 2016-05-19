@@ -1,24 +1,30 @@
-function AsyncArray(src, meta) {
-  const clone = src.slice(0);
-  if (!(clone instanceof AsyncArray)) {
-    clone.__proto__ = AsyncArray.prototype;
-    Object.defineProperties(clone, {
-      __running__: {
-        value: false,
-        enummerable: false,
-      },
-      __async_queue__: {
-        value: [],
-        enumerable: false,
-        writable: false,
-      },
-    });
+function AsyncArray(src) {
+  if (!(src instanceof Array)) {
+    throw new TypeError('1 argument of type Array is required');
   }
-  if (meta) {
-    clone.__running__ = meta.__running__;
-    clone.__async_queue__ = meta.__async_queue__;
+  if (!(this instanceof AsyncArray)) {
+    return new AsyncArray(src);
   }
-  return clone;
+
+  Object.defineProperties(this, {
+    __running__: {
+      value: false,
+      enumerable: false,
+      writable: true,
+    },
+    __async_queue__: {
+      value: [],
+      enumerable: false,
+      writable: false,
+    },
+    __result__: {
+      value: src.slice(0),
+      enumerable: false,
+      writable: true,
+    },
+  });
+
+  src.forEach(entry => this.push(entry));
 }
 
 AsyncArray.prototype.__proto__ = Array.prototype;
@@ -26,6 +32,8 @@ AsyncArray.prototype.__proto__ = Array.prototype;
 AsyncArray.prototype.__running__ = false;
 
 AsyncArray.prototype.__async_queue__ = [];
+
+AsyncArray.prototype.__result__ = null;
 
 /**
  * Queues up a function to be executed asynchronously
@@ -53,7 +61,7 @@ function nextInQueue() {
  * @param superFn {Function}
  * @returns {iterableFn}
  */
-function generateIterableWrapper(superFn) {
+function generateIterableWrapper(superFn, methodName) {
   return function iterableFn(callback, ...extraArgs) {
     /*
      If already waiting on a previous function to finish, queue up this
@@ -73,7 +81,7 @@ function generateIterableWrapper(superFn) {
       let i = 0;
       const me = this;
 
-      superFn.apply(this, [function (...args) {
+      superFn.apply(this.__result__, [function (...args) {
         const ii = i++;
         const done = (val) => async(() => {
           const index = doneFn.indexOf(done);
@@ -82,15 +90,21 @@ function generateIterableWrapper(superFn) {
             doneFn.splice(index, 1);
             if (doneFn.length === 0) {
               let iii = 0;
-              const result = superFn.call(me, () => responses[iii++]);
-              nextInQueue.call(result ? new AsyncArray(result, me) : me);
+              const result = superFn.call(me.__result__, () => responses[iii++]);
+              me.__result__ = result || me.__result__;
+              nextInQueue.call(me);
             }
           }
         });
 
         doneFn.push(done);
 
-        return callback.apply(this, [done].concat(args));
+        const resp = callback.apply(this.__result__, [done].concat(args));
+        if (resp !== undefined) {
+          done(resp);
+        }
+
+        return resp;
       }].concat(extraArgs));
     }
     return this;
@@ -111,7 +125,7 @@ const supportedFunctions = [
 
 supportedFunctions.forEach((fn) => {
   if (Array.prototype[fn]) {
-    AsyncArray.prototype[fn] = generateIterableWrapper(Array.prototype[fn]);
+    AsyncArray.prototype[fn] = generateIterableWrapper(Array.prototype[fn], fn);
   }
 });
 
@@ -120,20 +134,15 @@ function then(callback, ...args) {
     this.__async_queue__.push({ fn: then, args: [callback].concat(args) });
   } else {
     const done = (resp) => {
-      nextInQueue.call(resp ? new AsyncArray(resp) : this);
+      this.__result__ = resp || this.slice(0);
+      nextInQueue.call(this);
     };
-    callback.call(this, done);
+    callback.call(this, done, this.__result__);
   }
   return this;
 }
 
 AsyncArray.prototype.then = then;
-
-function toArray() {
-  return [].concat(this);
-}
-
-AsyncArray.prototype.toArray = toArray;
 
 AsyncArray.utils = { async };
 

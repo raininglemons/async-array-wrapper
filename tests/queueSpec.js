@@ -16,11 +16,11 @@ describe('Test chained function calls are called appropriately and in order', ()
           done();
         })
         .forEach((done, v, i) => {
-          record.push(4 + i);
+          record.push(5 + i);
           done();
         })
         .then(() => {
-          expect(record).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+          expect(record).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
           finished();
         });
 
@@ -38,11 +38,11 @@ describe('Test chained function calls are called appropriately and in order', ()
           async(done);
         })
         .forEach((done, v, i) => {
-          record.push(4 + i);
+          record.push(5 + i);
           async(done);
         })
         .then(() => {
-          expect(record).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+          expect(record).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
           finished();
         });
 

@@ -12,8 +12,8 @@ describe('Test AsyncArrays.forEach behaves like Array.forEach', () => {
           done(null);
           return null;
         })
-        .then(function() {
-          expect(this.toArray()).toEqual([0, 1, 2, 3]);
+        .then((done, result) => {
+          expect(result).toEqual([0, 1, 2, 3]);
           finished();
         });
     });
@@ -24,8 +24,8 @@ describe('Test AsyncArrays.forEach behaves like Array.forEach', () => {
           async(() => done(null))
           return null;
         })
-        .then(function() {
-          expect(this.toArray()).toEqual([0, 1, 2, 3]);
+        .then((done, result) => {
+          expect(result).toEqual([0, 1, 2, 3]);
           finished();
         });
     });
@@ -38,8 +38,8 @@ describe('Test AsyncArrays.forEach behaves like Array.forEach', () => {
           a.splice(0);
           done();
         })
-        .then(function() {
-          expect(this.toArray()).toEqual([]);
+        .then((done, result) => {
+          expect(result).toEqual([]);
           finished();
         });
     });
@@ -48,10 +48,10 @@ describe('Test AsyncArrays.forEach behaves like Array.forEach', () => {
       new AsyncArray([0, 1, 2, 3])
         .forEach((done, v, i, a) => {
           a.splice(0);
-          async(() => done);
+          async(done);
         })
-        .then(function() {
-          expect(this.toArray()).toEqual([]);
+        .then((done, result) => {
+          expect(result).toEqual([]);
           finished();
         });
     });
