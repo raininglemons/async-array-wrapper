@@ -2,6 +2,17 @@ function AsyncArray(src, meta) {
   const clone = src.slice(0);
   if (!(clone instanceof AsyncArray)) {
     clone.__proto__ = AsyncArray.prototype;
+    Object.defineProperties(clone, {
+      __running__: {
+        value: false,
+        enummerable: false,
+      },
+      __async_queue__: {
+        value: [],
+        enumerable: false,
+        writable: false,
+      },
+    });
   }
   if (meta) {
     clone.__running__ = meta.__running__;
@@ -86,15 +97,23 @@ function generateIterableWrapper(superFn) {
   };
 }
 
-AsyncArray.prototype.forEach = generateIterableWrapper(Array.prototype.forEach);
-AsyncArray.prototype.map = generateIterableWrapper(Array.prototype.map);
-AsyncArray.prototype.every = generateIterableWrapper(Array.prototype.every);
-AsyncArray.prototype.filter = generateIterableWrapper(Array.prototype.filter);
-AsyncArray.prototype.find = generateIterableWrapper(Array.prototype.find);
-AsyncArray.prototype.findIndex = generateIterableWrapper(Array.prototype.findIndex);
-AsyncArray.prototype.reduce = generateIterableWrapper(Array.prototype.reduce);
-AsyncArray.prototype.reduceRight = generateIterableWrapper(Array.prototype.reduceRight);
-AsyncArray.prototype.some = generateIterableWrapper(Array.prototype.some);
+const supportedFunctions = [
+  'forEach',
+  'map',
+  'every',
+  'filter',
+  'find',
+  'findIndex',
+  'reduce',
+  'reduceRight',
+  'some',
+];
+
+supportedFunctions.forEach((fn) => {
+  if (Array.prototype[fn]) {
+    AsyncArray.prototype[fn] = generateIterableWrapper(Array.prototype[fn]);
+  }
+});
 
 function then(callback, ...args) {
   if (this.__running__) {
@@ -109,6 +128,12 @@ function then(callback, ...args) {
 }
 
 AsyncArray.prototype.then = then;
+
+function toArray() {
+  return [].concat(this);
+}
+
+AsyncArray.prototype.toArray = toArray;
 
 AsyncArray.utils = { async };
 
