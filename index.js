@@ -22,8 +22,7 @@ AsyncArray(['one', 'two', 'three', 'four'])
   })
   .map((done, val, i) => {
     console.log('mapping');
-    done();
-    return `${i} -> ${val}`;
+    done(`${i} -> ${val}`);
   })
   .then(function(done) {
     console.log('final array');

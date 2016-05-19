@@ -1,7 +1,11 @@
-function AsyncArray(src) {
+function AsyncArray(src, meta) {
   clone = src.slice(0);
   if (!(clone instanceof AsyncArray)) {
     clone.__proto__ = AsyncArray.prototype;
+  }
+  if (meta) {
+    clone.__running__ = meta.__running__;
+    clone.__async_queue__ = meta.__async_queue__;
   }
   return clone;
 }
@@ -54,15 +58,21 @@ function generateIterableWrapper(superFn) {
       problems if a done() instance is called accidentally more than once.
        */
       const doneFn = [];
+      const responses = [];
+      let i = 0;
       let me = this;
 
-      const resp = superFn.apply(this, [function (...args) {
-        const done = () => async(() => {
+      superFn.apply(this, [function (...args) {
+        const ii = i++;
+        const done = (val) => async(() => {
           const index = doneFn.indexOf(done);
           if (index > -1) {
+            responses[ii] = val;
             doneFn.splice(index, 1);
             if (doneFn.length === 0) {
-              nextInQueue.call(me);
+              let iii = 0;
+              let result = superFn.call(me, () => responses[iii++]);
+              nextInQueue.call(result ? AsyncArray(result, me) : me);
             }
           }
         });
@@ -72,11 +82,10 @@ function generateIterableWrapper(superFn) {
         return callback.apply(this, [done].concat(args));
       }].concat(extraArgs));
 
-      /*
-      Replace array with result of action if provided.
-       */
+      /* let resp =
       if (resp)
         me = AsyncArray(resp);
+        */
     }
     return this;
   };
