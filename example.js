@@ -1,5 +1,5 @@
 const fs = require('fs');
-const AsyncArray = require('./index.js');
+const AsyncArray = require('async-array-wrapper');
 const { async } = AsyncArray.utils;
 
 /*

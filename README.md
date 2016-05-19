@@ -8,11 +8,19 @@ function to call to signal the the iterator function is truly finished.
 
 This lib is designed to allow for arrays to be iterated then processed with asynchronous functions.
 
+## Install
+
+Add `async-array-wrapper` to your package.json.
+
+```bash
+    npm install async-array-wrapper --save
+```
+
 ## Example
 
 ```javascript
 const fs = require('fs');
-const AsyncArray = require('./index.js');
+const AsyncArray = require('async-array-wrapper');
 
 /*
  Here we want to list all sub directories within a directory. fs lends itself to asynchronous execution which we normally
@@ -72,7 +80,7 @@ This can be inserted anywhere in the chain, and as such is chainable. This expos
 array. For example;
 
 ```javascript
-const AsyncArray = require('./index.js');
+const AsyncArray = require('async-array-wrapper');
 const { async } = AsyncArray.utils;
 
 new AsyncArray([1, 2, 3, 4])
