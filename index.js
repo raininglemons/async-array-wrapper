@@ -90,7 +90,7 @@ function generateIterableWrapper(superFn, methodName) {
             doneFn.splice(index, 1);
             if (doneFn.length === 0) {
               let iii = 0;
-              const result = superFn.call(me.__result__, () => responses[iii++]);
+              const result = superFn.apply(me.__result__, [() => responses[iii++]].concat(extraArgs));
               me.__result__ = result || me.__result__;
               nextInQueue.call(me);
             }
